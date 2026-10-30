@@ -2,20 +2,18 @@ name: Build APK
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
         with:
-          python-version: '3.9'
-      - run: pip install buildozer==1.5.0 Cython==0.29.36
-      - run: sudo apt update && sudo apt install -y openjdk-17-jdk zip unzip libffi-dev
-      - run: buildozer init || true
-      - run: sed -i 's/title = My Application/title = Farming Game/' buildozer.spec || true
-      - run: sed -i 's/package.name = myapp/package.name = com.fxhard.farming/' buildozer.spec || true
-      - run: sed -i 's/#android.accept_sdk_license_agreements = False/android.accept_sdk_license_agreements = True/' buildozer.spec || true
-      - run: buildozer android debug
-      - uses: actions/upload-artifact@v4
+          workdir: .
+          buildozer_version: stable
+          command: buildozer android debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: Farming-APK
           path: bin/*.apk
